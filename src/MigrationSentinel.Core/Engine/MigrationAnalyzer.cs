@@ -7,10 +7,6 @@ using MigrationSentinel.Core.Rules;
 
 namespace MigrationSentinel.Core.Engine;
 
-/// <summary>
-/// Core orchestration engine that parses migration documents, executes AST risk rules,
-/// computes composite risk scores, and generates consolidated mitigation scripts.
-/// </summary>
 public sealed class MigrationAnalyzer
 {
     private readonly IMigrationParser _parser;
@@ -26,9 +22,6 @@ public sealed class MigrationAnalyzer
 
     public IReadOnlyList<IRiskRule> Rules => _rules;
 
-    /// <summary>
-    /// Analyzes a single in-memory migration script or EF Core C# file.
-    /// </summary>
     public AnalysisReport AnalyzeContent(
         string filePath,
         string content,
@@ -44,9 +37,6 @@ public sealed class MigrationAnalyzer
         return BuildReport(filePath, [doc], findings, sw.Elapsed);
     }
 
-    /// <summary>
-    /// Analyzes a collection of migration files from disk.
-    /// </summary>
     public async Task<AnalysisReport> AnalyzeFilesAsync(
         string scannedTarget,
         IEnumerable<string> filePaths,
@@ -78,9 +68,6 @@ public sealed class MigrationAnalyzer
         return BuildReport(scannedTarget, documents, findings, sw.Elapsed);
     }
 
-    /// <summary>
-    /// Builds a consolidated, commented mitigation SQL script from all findings that produced one.
-    /// </summary>
     public static string GenerateConsolidatedMitigationScript(AnalysisReport report)
     {
         var sb = new StringBuilder();

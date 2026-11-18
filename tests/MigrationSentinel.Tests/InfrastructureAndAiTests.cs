@@ -57,7 +57,6 @@ public sealed class InfrastructureAndAiTests
             await RunGitAsync(repoDir, "add", ".");
             await RunGitAsync(repoDir, "commit", "-m", "initial commit");
 
-            // Add a new migration and stage it
             await File.WriteAllTextAsync(Path.Combine(repoDir, "002_new.sql"), "CREATE INDEX IX_Test ON dbo.Users (Id);");
             await File.WriteAllTextAsync(Path.Combine(repoDir, "notes.txt"), "not a migration");
             await RunGitAsync(repoDir, "add", "002_new.sql", "notes.txt");
@@ -130,7 +129,6 @@ public sealed class InfrastructureAndAiTests
         okResult.ExecutiveSummary.Should().Contain("blocking index lock");
         okResult.RolloutChecklist.Should().ContainSingle("Use CONCURRENTLY");
 
-        // Error handling path
         using var errHttp = new HttpClient(new StubHttpMessageHandler(HttpStatusCode.ServiceUnavailable, "offline"));
         var errProvider = new OllamaReviewProvider(new AiProviderOptions { Provider = "ollama" }, errHttp);
         var errResult = await errProvider.ReviewAsync(report);

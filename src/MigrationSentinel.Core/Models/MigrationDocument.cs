@@ -1,8 +1,5 @@
 namespace MigrationSentinel.Core.Models;
 
-/// <summary>
-/// Represents a parsed migration source file along with its extracted AST operations.
-/// </summary>
 public sealed record MigrationDocument
 {
     public required string FilePath { get; init; }

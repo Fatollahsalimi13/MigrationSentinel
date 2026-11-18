@@ -4,10 +4,6 @@ using MigrationSentinel.Infrastructure.Scanning;
 
 namespace MigrationSentinel.Infrastructure.Git;
 
-/// <summary>
-/// Analyzes Git diffs to return only added or modified SQL &amp; EF Core migration files.
-/// Ideal for CI/CD Pull Request gating where historical migrations should not block new PRs.
-/// </summary>
 public sealed class GitDiffMigrationAnalyzer : IGitDiffAnalyzer
 {
     public async Task<IReadOnlyList<string>> GetChangedMigrationFilesAsync(
@@ -37,7 +33,6 @@ public sealed class GitDiffMigrationAnalyzer : IGitDiffAnalyzer
         }
         else
         {
-            // Unstaged + staged changes against HEAD plus untracked files
             var diffOutput = await RunGitAsync(repoRoot, ["diff", "--name-only", "--diff-filter=ACMR", "HEAD"], cancellationToken, allowNonZero: true);
             AddLines(relativePaths, diffOutput);
 

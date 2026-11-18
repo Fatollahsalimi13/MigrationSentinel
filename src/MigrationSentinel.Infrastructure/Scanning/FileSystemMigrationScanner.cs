@@ -2,9 +2,6 @@ using MigrationSentinel.Core.Abstractions;
 
 namespace MigrationSentinel.Infrastructure.Scanning;
 
-/// <summary>
-/// Recursively discovers SQL migration scripts and Entity Framework Core migration files on disk.
-/// </summary>
 public sealed class FileSystemMigrationScanner : IMigrationFileScanner
 {
     private static readonly HashSet<string> IgnoredDirectories = new(StringComparer.OrdinalIgnoreCase)
@@ -74,7 +71,6 @@ public sealed class FileSystemMigrationScanner : IMigrationFileScanner
             fileName.EndsWith("ModelSnapshot.cs", StringComparison.OrdinalIgnoreCase))
             return false;
 
-        // Lightweight read to confirm EF Core Migration signature
         var content = await File.ReadAllTextAsync(filePath, cancellationToken);
         return content.Contains("MigrationBuilder", StringComparison.Ordinal) &&
                (content.Contains(": Migration", StringComparison.Ordinal) ||

@@ -5,9 +5,6 @@ using MigrationSentinel.Core.Parsing.Sql;
 
 namespace MigrationSentinel.Core.Parsing;
 
-/// <summary>
-/// Routes migration files to the appropriate SQL or EF Core Roslyn AST parser.
-/// </summary>
 public sealed class CompositeMigrationParser : IMigrationParser
 {
     private readonly IReadOnlyList<IMigrationParser> _parsers;

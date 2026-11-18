@@ -7,11 +7,6 @@ using MigrationSentinel.Core.Parsing.Sql;
 
 namespace MigrationSentinel.Core.Parsing.EfCore;
 
-/// <summary>
-/// Roslyn C# Abstract Syntax Tree (AST) parser for Entity Framework Core <c>Migration</c> classes.
-/// Accurately extracts <c>MigrationBuilder</c> operations, nested <c>CreateTable</c> cascade constraints,
-/// empty <c>Down()</c> rollbacks, and recursively analyzes raw SQL passed to <c>migrationBuilder.Sql()</c>.
-/// </summary>
 public sealed class EfCoreMigrationParser : IMigrationParser
 {
     private readonly SqlMigrationParser _sqlParser;
@@ -70,7 +65,6 @@ public sealed class EfCoreMigrationParser : IMigrationParser
             ParseUpMethod(upMethod, operations);
         }
 
-        // Check if Down() is missing or completely empty when Up() performs operations
         if (operations.Count > 0 && IsMethodEmptyOrMissing(downMethod))
         {
             int line = downMethod is not null
@@ -258,7 +252,6 @@ public sealed class EfCoreMigrationParser : IMigrationParser
                         RawStatement = sqlLiteral ?? raw
                     });
 
-                    // Recursively parse embedded SQL via the SQL AST parser
                     if (!string.IsNullOrWhiteSpace(sqlLiteral))
                     {
                         var embeddedOps = _sqlParser.ParseSqlContent(sqlLiteral, lineOffset: line - 1);

@@ -157,9 +157,6 @@ public sealed class MarkdownReportFormatter : IReportFormatter
     private static string EscapePipe(string input) => input.Replace("|", "\\|");
 }
 
-/// <summary>
-/// Exports analysis findings in SARIF v2.1.0 format for GitHub Code Scanning &amp; IDE integration.
-/// </summary>
 public sealed class SarifReportFormatter : IReportFormatter
 {
     public string FormatName => "sarif";
@@ -264,7 +261,6 @@ public sealed class SarifReportFormatter : IReportFormatter
         }
         catch
         {
-            // Fall back to normalized path
         }
         return path.Replace('\\', '/');
     }

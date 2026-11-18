@@ -58,7 +58,6 @@ public sealed class AnalyzerAndReportingTests
         const string sql = "DROP TABLE [dbo].[ArchivedUsers];";
         var report = _analyzer.AnalyzeContent("migrations/001_drop.sql", sql);
 
-        // JSON
         var json = new JsonReportFormatter().Format(report);
         using (var doc = JsonDocument.Parse(json))
         {
@@ -67,13 +66,11 @@ public sealed class AnalyzerAndReportingTests
             doc.RootElement.GetProperty("summary").GetProperty("overallSeverity").GetString().Should().Be("Critical");
         }
 
-        // Markdown
         var md = new MarkdownReportFormatter().Format(report);
         md.Should().Contain("# 🛡️ MigrationSentinel Risk Report");
         md.Should().Contain("MS001");
         md.Should().Contain("```sql");
 
-        // SARIF 2.1.0
         var sarif = new SarifReportFormatter().Format(report);
         using (var sarifDoc = JsonDocument.Parse(sarif))
         {

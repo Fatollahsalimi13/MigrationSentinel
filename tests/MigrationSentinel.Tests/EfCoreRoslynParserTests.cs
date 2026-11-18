@@ -76,7 +76,6 @@ public sealed class EfCoreRoslynParserTests
         var ruleIds = report.Findings.Select(f => f.RuleId).ToList();
         ruleIds.Should().Contain(["MS001", "MS002", "MS004", "MS005", "MS006", "MS007", "MS010", "MS011", "MS014"]);
 
-        // Narrowing maxLength (50 -> 15) elevates MS004 to Critical DataLoss
         var alterFinding = report.Findings.First(f => f.RuleId == "MS004");
         alterFinding.Severity.Should().Be(RiskSeverity.Critical);
         alterFinding.Category.Should().Be(RiskCategory.DataLoss);
@@ -147,7 +146,6 @@ public sealed class EfCoreRoslynParserTests
         var report = _analyzer.AnalyzeContent("20261118_AddOrderItems.cs", cs);
 
         report.Findings.Should().ContainSingle(f => f.RuleId == "MS012");
-        // DropTable inside Down() must NOT be flagged as an Up() risk
         report.Findings.Should().NotContain(f => f.RuleId == "MS001");
     }
 

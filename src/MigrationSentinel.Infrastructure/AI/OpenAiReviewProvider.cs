@@ -6,9 +6,6 @@ using MigrationSentinel.Core.Models;
 
 namespace MigrationSentinel.Infrastructure.AI;
 
-/// <summary>
-/// OpenAI-compatible Chat Completions client (works with OpenAI API, Codex models, Azure OpenAI, OpenRouter, vLLM).
-/// </summary>
 public sealed class OpenAiReviewProvider : IAiReviewProvider
 {
     public const string DefaultEndpoint = "https://api.openai.com/v1/chat/completions";

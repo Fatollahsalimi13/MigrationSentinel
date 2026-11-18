@@ -94,7 +94,6 @@ internal static class AiPromptBuilder
         }
         catch (JsonException)
         {
-            // Fallback gracefully if a smaller local model returns prose instead of strict JSON
             return new AiReviewResult
             {
                 Provider = provider,

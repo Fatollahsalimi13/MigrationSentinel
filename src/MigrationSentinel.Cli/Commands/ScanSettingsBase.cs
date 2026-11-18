@@ -129,7 +129,6 @@ internal static class AnalysisExecutionHelper
             report = await analyzer.AnalyzeFilesAsync(scannedTarget, files, options);
         }
 
-        // Optional AI review layer
         var aiProviderName = !string.IsNullOrWhiteSpace(settings.AiProvider)
             ? settings.AiProvider
             : config?.AiProvider ?? "none";
@@ -161,7 +160,6 @@ internal static class AnalysisExecutionHelper
             report = report with { AiReview = aiResult };
         }
 
-        // Render or emit formatted report
         if (format == "console")
         {
             renderer.RenderReport(report, settings.Verbose);
@@ -177,7 +175,6 @@ internal static class AnalysisExecutionHelper
             await EmitFormattedOutputAsync(console, report, format, settings.OutputPath);
         }
 
-        // Optional consolidated mitigation SQL export
         if (!string.IsNullOrWhiteSpace(settings.MitigationOutputPath))
         {
             var mitigationSql = MigrationAnalyzer.GenerateConsolidatedMitigationScript(report);

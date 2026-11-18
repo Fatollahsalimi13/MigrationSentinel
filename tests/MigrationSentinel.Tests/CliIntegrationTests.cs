@@ -53,7 +53,6 @@ public sealed class CliIntegrationTests
 
             var app = CliAppFactory.CreateApp(console);
 
-            // Risky file exceeds default fail-on=high => exit code 1
             var riskyExit = await app.RunAsync(["scan", riskyFile, "--format", "sarif", "--output", sarifOut, "--mitigation-out", mitigationOut]);
             riskyExit.Should().Be(1);
             File.Exists(sarifOut).Should().BeTrue();
@@ -61,7 +60,6 @@ public sealed class CliIntegrationTests
             (await File.ReadAllTextAsync(sarifOut)).Should().Contain("MS001");
             (await File.ReadAllTextAsync(mitigationOut)).Should().Contain("sp_rename");
 
-            // Safe file => exit code 0
             var safeExit = await app.RunAsync(["scan", safeFile]);
             safeExit.Should().Be(0);
         }

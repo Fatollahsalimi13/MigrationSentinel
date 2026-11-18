@@ -5,9 +5,6 @@ using MigrationSentinel.Core.Models;
 
 namespace MigrationSentinel.Infrastructure.AI;
 
-/// <summary>
-/// Privacy-first local Ollama LLM client for air-gapped or enterprise self-hosted migration reviews.
-/// </summary>
 public sealed class OllamaReviewProvider : IAiReviewProvider
 {
     public const string DefaultBaseUrl = "http://localhost:11434";

@@ -3,9 +3,6 @@ using Spectre.Console;
 
 namespace MigrationSentinel.Cli.Rendering;
 
-/// <summary>
-/// Renders rich, colorized terminal reports using Spectre.Console tables, panels, and charts.
-/// </summary>
 public sealed class ConsoleReportRenderer
 {
     private readonly IAnsiConsole _console;

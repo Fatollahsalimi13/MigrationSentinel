@@ -2,11 +2,6 @@ using System.Text;
 
 namespace MigrationSentinel.Core.Parsing.Sql;
 
-/// <summary>
-/// Dialect-aware SQL lexer supporting T-SQL and PostgreSQL syntax.
-/// Strips single-line (--), nested multi-line (/* */) comments, and tokenizes
-/// quoted identifiers ([name], "name", `name`) and string/dollar-quoted literals.
-/// </summary>
 public sealed class SqlLexer
 {
     public IReadOnlyList<SqlToken> Tokenize(string sql)
@@ -24,7 +19,6 @@ public sealed class SqlLexer
         {
             char c = sql[i];
 
-            // Whitespace
             if (char.IsWhiteSpace(c))
             {
                 if (c == '\n')
@@ -40,7 +34,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // Single-line comment: --
             if (c == '-' && i + 1 < len && sql[i + 1] == '-')
             {
                 i += 2;
@@ -53,7 +46,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // Multi-line comment: /* ... */ (supports nesting for PostgreSQL)
             if (c == '/' && i + 1 < len && sql[i + 1] == '*')
             {
                 int depth = 1;
@@ -90,7 +82,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // T-SQL Unicode string N'...' or standard string '...'
             if (c == '\'' || ((c == 'N' || c == 'n' || c == 'E' || c == 'e') && i + 1 < len && sql[i + 1] == '\''))
             {
                 int startIdx = i;
@@ -104,7 +95,6 @@ public sealed class SqlLexer
                     col++;
                 }
 
-                // Skip opening quote
                 i++;
                 col++;
 
@@ -142,7 +132,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // PostgreSQL dollar-quoted string: $$...$$ or $tag$...$tag$
             if (c == '$')
             {
                 int tagEnd = i + 1;
@@ -180,7 +169,6 @@ public sealed class SqlLexer
                 }
             }
 
-            // Quoted identifiers: [name], "name", `name`
             if (c is '[' or '"' or '`')
             {
                 char closeChar = c == '[' ? ']' : c;
@@ -223,7 +211,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // Numbers
             if (char.IsDigit(c))
             {
                 int startIdx = i;
@@ -239,7 +226,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // Words / unquoted identifiers / keywords
             if (char.IsLetter(c) || c == '_' || c == '@' || c == '#')
             {
                 int startIdx = i;
@@ -255,7 +241,6 @@ public sealed class SqlLexer
                 continue;
             }
 
-            // Single-character punctuation / symbols
             int symStart = i;
             int symCol = col;
             i++;

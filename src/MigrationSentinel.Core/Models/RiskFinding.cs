@@ -1,8 +1,5 @@
 namespace MigrationSentinel.Core.Models;
 
-/// <summary>
-/// Represents an individual risk finding detected by a rule during migration analysis.
-/// </summary>
 public sealed record RiskFinding
 {
     public required string RuleId { get; init; }

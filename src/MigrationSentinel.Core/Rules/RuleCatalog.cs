@@ -3,9 +3,6 @@ using MigrationSentinel.Core.Rules.BuiltIn;
 
 namespace MigrationSentinel.Core.Rules;
 
-/// <summary>
-/// Provides the complete catalog of built-in MigrationSentinel AST &amp; heuristic risk rules.
-/// </summary>
 public static class RuleCatalog
 {
     public static IReadOnlyList<IRiskRule> CreateDefaultRules() =>

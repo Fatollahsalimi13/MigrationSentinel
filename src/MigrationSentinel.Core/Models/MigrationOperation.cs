@@ -1,8 +1,5 @@
 namespace MigrationSentinel.Core.Models;
 
-/// <summary>
-/// Represents a normalized database schema or data operation extracted from a migration AST.
-/// </summary>
 public sealed record MigrationOperation
 {
     public required MigrationOperationType OperationType { get; init; }

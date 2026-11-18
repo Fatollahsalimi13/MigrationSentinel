@@ -3,10 +3,6 @@ using MigrationSentinel.Core.Models;
 
 namespace MigrationSentinel.Core.Parsing.Sql;
 
-/// <summary>
-/// AST-based SQL migration parser supporting SQL Server (T-SQL) and PostgreSQL DDL/DML statements.
-/// Extracts normalized <see cref="MigrationOperation"/> instances with exact source line mapping.
-/// </summary>
 public sealed class SqlMigrationParser : IMigrationParser
 {
     private readonly SqlLexer _lexer = new();
@@ -32,10 +28,6 @@ public sealed class SqlMigrationParser : IMigrationParser
         };
     }
 
-    /// <summary>
-    /// Parses raw SQL statements and shifts reported line numbers by <paramref name="lineOffset"/>.
-    /// Used both for standalone .sql files and embedded SQL inside EF Core migrationBuilder.Sql() calls.
-    /// </summary>
     public IReadOnlyList<MigrationOperation> ParseSqlContent(string sql, int lineOffset = 0)
     {
         var tokens = _lexer.Tokenize(sql);
@@ -74,7 +66,6 @@ public sealed class SqlMigrationParser : IMigrationParser
                 continue;
             }
 
-            // T-SQL batch separator: standalone GO at the start of a new line
             if (token.IsKeyword("GO") &&
                 (i == 0 || tokens[i - 1].Line < token.Line) &&
                 (i == tokens.Count - 1 || tokens[i + 1].Line > token.Line))
@@ -143,7 +134,6 @@ public sealed class SqlMigrationParser : IMigrationParser
 
         bool isCascade = stmt.Any(t => t.IsKeyword("CASCADE"));
 
-        // DROP TABLE [IF EXISTS] [schema.]table
         if (stmt[1].IsKeyword("TABLE"))
         {
             int idx = SkipIfExists(stmt, 2);
@@ -160,7 +150,6 @@ public sealed class SqlMigrationParser : IMigrationParser
             yield break;
         }
 
-        // DROP INDEX [CONCURRENTLY] [IF EXISTS] [schema.]index [ON [schema.]table] [WITH (ONLINE = ON)]
         if (stmt[1].IsKeyword("INDEX"))
         {
             int idx = 2;
@@ -236,7 +225,6 @@ public sealed class SqlMigrationParser : IMigrationParser
         if (actionStart >= stmt.Count)
             yield break;
 
-        // Split top-level comma-separated ALTER TABLE clauses (PostgreSQL multi-action syntax)
         var clauses = SplitTopLevelClauses(stmt, actionStart);
         foreach (var clause in clauses)
         {
@@ -260,7 +248,6 @@ public sealed class SqlMigrationParser : IMigrationParser
         var head = clause[0];
         bool isCascade = clause.Any(t => t.IsKeyword("CASCADE"));
 
-        // DROP COLUMN [IF EXISTS] col
         if (head.IsKeyword("DROP") && clause.Count >= 2)
         {
             if (clause[1].IsKeyword("COLUMN"))
@@ -299,7 +286,6 @@ public sealed class SqlMigrationParser : IMigrationParser
             }
         }
 
-        // ALTER [COLUMN] col ...
         if (head.IsKeyword("ALTER") && clause.Count >= 3)
         {
             int idx = 1;
@@ -312,7 +298,6 @@ public sealed class SqlMigrationParser : IMigrationParser
             var colName = clause[idx].NormalizedValue;
             idx++;
 
-            // PostgreSQL: ALTER COLUMN col SET NOT NULL
             if (HasKeywordSequence(clause, idx, "SET", "NOT", "NULL"))
             {
                 yield return new MigrationOperation
@@ -328,7 +313,6 @@ public sealed class SqlMigrationParser : IMigrationParser
                 yield break;
             }
 
-            // PostgreSQL: ALTER COLUMN col [SET DATA] TYPE <type>
             int typeIdx = FindKeywordIndex(clause, "TYPE", idx);
             if (typeIdx >= 0 && typeIdx + 1 < clause.Count)
             {
@@ -347,11 +331,9 @@ public sealed class SqlMigrationParser : IMigrationParser
                 yield break;
             }
 
-            // Ignore benign SET DEFAULT / DROP DEFAULT / DROP NOT NULL
             if (idx < clause.Count && (clause[idx].IsKeyword("SET") || clause[idx].IsKeyword("DROP")))
                 yield break;
 
-            // SQL Server: ALTER COLUMN col <dataType> [NOT NULL | NULL]
             if (idx < clause.Count && clause[idx].IsIdentifier)
             {
                 var (dataType, maxLen) = ReadDataType(clause, idx);
@@ -388,12 +370,10 @@ public sealed class SqlMigrationParser : IMigrationParser
             }
         }
 
-        // ADD ...
         if (head.IsKeyword("ADD") && clause.Count >= 2)
         {
             int idx = 1;
 
-            // Check if ADD [CONSTRAINT name] FOREIGN KEY ... ON DELETE CASCADE
             if (clause[idx].IsKeyword("CONSTRAINT") ||
                 clause[idx].IsKeyword("FOREIGN") ||
                 clause[idx].IsKeyword("PRIMARY") ||
@@ -421,7 +401,6 @@ public sealed class SqlMigrationParser : IMigrationParser
                 yield break;
             }
 
-            // ADD [COLUMN] [IF NOT EXISTS] col <type> [NOT NULL] [DEFAULT ...]
             if (clause[idx].IsKeyword("COLUMN"))
                 idx++;
             idx = SkipIfNotExists(clause, idx);
@@ -453,10 +432,8 @@ public sealed class SqlMigrationParser : IMigrationParser
             yield break;
         }
 
-        // RENAME ...
         if (head.IsKeyword("RENAME") && clause.Count >= 3)
         {
-            // RENAME TO new_table
             if (clause[1].IsKeyword("TO"))
             {
                 yield return new MigrationOperation
@@ -471,7 +448,6 @@ public sealed class SqlMigrationParser : IMigrationParser
                 yield break;
             }
 
-            // RENAME [COLUMN] old_col TO new_col
             int idx = clause[1].IsKeyword("COLUMN") ? 2 : 1;
             int toIdx = FindKeywordIndex(clause, "TO", idx + 1);
             if (toIdx > idx && toIdx + 1 < clause.Count)
@@ -492,7 +468,6 @@ public sealed class SqlMigrationParser : IMigrationParser
 
     private static IEnumerable<MigrationOperation> ParseCreateStatement(List<SqlToken> stmt, string rawText, int line)
     {
-        // CREATE [UNIQUE] [CLUSTERED|NONCLUSTERED] INDEX [CONCURRENTLY] [IF NOT EXISTS] name ON table (...)
         int indexKeywordPos = -1;
         for (int i = 1; i < Math.Min(stmt.Count, 5); i++)
         {
@@ -553,7 +528,6 @@ public sealed class SqlMigrationParser : IMigrationParser
             yield break;
         }
 
-        // CREATE TABLE ... ON DELETE CASCADE detection
         if (stmt.Count >= 3 && stmt[1].IsKeyword("TABLE"))
         {
             int idx = SkipIfNotExists(stmt, 2);
@@ -576,7 +550,6 @@ public sealed class SqlMigrationParser : IMigrationParser
 
     private static IEnumerable<MigrationOperation> ParseExecStatement(List<SqlToken> stmt, string rawText, int line)
     {
-        // EXEC [dbo.]sp_rename 'Table.OldCol', 'NewCol', 'COLUMN'
         int renameIdx = stmt.FindIndex(t => t.NormalizedValue.Equals("sp_rename", StringComparison.OrdinalIgnoreCase));
         if (renameIdx < 0)
             yield break;
@@ -724,7 +697,6 @@ public sealed class SqlMigrationParser : IMigrationParser
         var typeName = tokens[startIndex].NormalizedValue;
         int idx = startIndex + 1;
 
-        // Handle multi-word PostgreSQL types like "CHARACTER VARYING", "DOUBLE PRECISION", "TIMESTAMP WITH TIME ZONE"
         if (idx < tokens.Count &&
             ((typeName.Equals("CHARACTER", StringComparison.OrdinalIgnoreCase) && tokens[idx].IsKeyword("VARYING")) ||
              (typeName.Equals("DOUBLE", StringComparison.OrdinalIgnoreCase) && tokens[idx].IsKeyword("PRECISION"))))

@@ -3,9 +3,6 @@ using MigrationSentinel.Core.Models;
 
 namespace MigrationSentinel.Core.Parsing;
 
-/// <summary>
-/// Infers whether a migration targets SQL Server or PostgreSQL from syntax and provider hints.
-/// </summary>
 public static partial class DialectDetector
 {
     public static DatabaseDialect Detect(string content, DatabaseDialect hint = DatabaseDialect.Auto)
@@ -19,7 +16,6 @@ public static partial class DialectDetector
         int pgScore = 0;
         int sqlServerScore = 0;
 
-        // PostgreSQL indicators
         if (PgIndicatorsRegex().IsMatch(content))
             pgScore += PgIndicatorsRegex().Matches(content).Count * 2;
         if (content.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
@@ -31,7 +27,6 @@ public static partial class DialectDetector
         if (PgQuotedSchemaRegex().IsMatch(content))
             pgScore += 2;
 
-        // SQL Server indicators
         if (SqlServerIndicatorsRegex().IsMatch(content))
             sqlServerScore += SqlServerIndicatorsRegex().Matches(content).Count * 2;
         if (content.Contains("SqlServer:", StringComparison.OrdinalIgnoreCase))

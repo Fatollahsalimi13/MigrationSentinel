@@ -1,8 +1,5 @@
 namespace MigrationSentinel.Core.Models;
 
-/// <summary>
-/// Supported relational database SQL dialects.
-/// </summary>
 public enum DatabaseDialect
 {
     Auto = 0,
@@ -10,18 +7,12 @@ public enum DatabaseDialect
     PostgreSql = 2
 }
 
-/// <summary>
-/// Source artifact format for a database migration.
-/// </summary>
 public enum MigrationSourceType
 {
     SqlScript = 0,
     EfCoreMigration = 1
 }
 
-/// <summary>
-/// Risk severity level assigned to a migration finding.
-/// </summary>
 public enum RiskSeverity
 {
     Info = 0,
@@ -31,9 +22,6 @@ public enum RiskSeverity
     Critical = 4
 }
 
-/// <summary>
-/// Classification of database migration operational risk.
-/// </summary>
 public enum RiskCategory
 {
     DataLoss = 0,
@@ -44,9 +32,6 @@ public enum RiskCategory
     BestPractice = 5
 }
 
-/// <summary>
-/// Normalized semantic operation extracted from SQL or EF Core ASTs.
-/// </summary>
 public enum MigrationOperationType
 {
     Unknown = 0,
