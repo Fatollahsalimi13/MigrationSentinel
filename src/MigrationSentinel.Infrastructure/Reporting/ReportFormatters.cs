@@ -222,7 +222,7 @@ public sealed class SarifReportFormatter : IReportFormatter
                         {
                             name = "MigrationSentinel",
                             version = "1.0.0",
-                            informationUri = "https://github.com/soghrazakeran4-bot/MigrationSentinel",
+                            informationUri = "https://github.com/Fatollahsalimi13/MigrationSentinel",
                             rules
                         }
                     },

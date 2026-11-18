@@ -5,8 +5,8 @@
     <Company>MigrationSentinel</Company>
     <Copyright>Copyright (c) 2026 MigrationSentinel Contributors</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/soghrazakeran4-bot/MigrationSentinel</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/soghrazakeran4-bot/MigrationSentinel</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Fatollahsalimi13/MigrationSentinel</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Fatollahsalimi13/MigrationSentinel</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>dotnet;efcore;migrations;sql;sqlserver;postgresql;devops;dba;static-analysis;ast;ai;cli;dotnet-tool</PackageTags>
     <Nullable>enable</Nullable>

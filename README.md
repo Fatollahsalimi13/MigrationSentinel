@@ -13,11 +13,11 @@
 
 **Catch destructive schema changes, table-locking DDL, and zero-downtime deployment hazards *before* they hit production — powered by Roslyn C# AST analysis, a dialect-aware SQL parser, and optional OpenAI / Ollama AI review.**
 
-[![CI/CD Build & Test](https://github.com/soghrazakeran4-bot/MigrationSentinel/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/soghrazakeran4-bot/MigrationSentinel/actions/workflows/ci-cd.yml)
+[![CI/CD Build & Test](https://github.com/Fatollahsalimi13/MigrationSentinel/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Fatollahsalimi13/MigrationSentinel/actions/workflows/ci-cd.yml)
 [![NuGet Version](https://img.shields.io/nuget/v/MigrationSentinel?color=004880&logo=nuget&label=NuGet)](https://www.nuget.org/packages/MigrationSentinel)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/MigrationSentinel?color=2ea44f&logo=nuget&label=Downloads)](https://www.nuget.org/packages/MigrationSentinel)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/soghrazakeran4-bot/MigrationSentinel?style=social)](https://github.com/soghrazakeran4-bot/MigrationSentinel/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/Fatollahsalimi13/MigrationSentinel?style=social)](https://github.com/Fatollahsalimi13/MigrationSentinel/stargazers)
 [![.NET 8+](https://img.shields.io/badge/.NET-8.0%20%7C%209.0%20%7C%2010.0-512BD4?logo=dotnet)](https://dotnet.microsoft.com/)
 
 </div>
@@ -92,7 +92,7 @@ dotnet add package MigrationSentinel.Core
 ### Build & Run from Source
 
 ```bash
-git clone https://github.com/soghrazakeran4-bot/MigrationSentinel.git
+git clone https://github.com/Fatollahsalimi13/MigrationSentinel.git
 cd MigrationSentinel
 dotnet build -c Release
 dotnet run --project src/MigrationSentinel.Cli -- scan samples

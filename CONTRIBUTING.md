@@ -7,7 +7,7 @@ Thank you for your interest in contributing to **MigrationSentinel**!
 1. Install the [.NET 8.0 SDK](https://dotnet.microsoft.com/download) (or newer).
 2. Clone the repository and restore dependencies:
    ```bash
-   git clone https://github.com/soghrazakeran4-bot/MigrationSentinel.git
+   git clone https://github.com/Fatollahsalimi13/MigrationSentinel.git
    cd MigrationSentinel
    dotnet restore MigrationSentinel.sln
    ```
