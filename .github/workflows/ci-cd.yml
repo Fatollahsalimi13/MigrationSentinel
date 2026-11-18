@@ -124,12 +124,17 @@ jobs:
           dotnet pack src/MigrationSentinel.Cli/MigrationSentinel.Cli.csproj -c Release -p:Version=${{ steps.version.outputs.value }} -o ./nupkg
 
       - name: Publish to NuGet.org
-        if: ${{ secrets.NUGET_API_KEY != '' }}
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: |
-          dotnet nuget push "./nupkg/*.nupkg" \
-            --api-key "${{ secrets.NUGET_API_KEY }}" \
-            --source https://api.nuget.org/v3/index.json \
-            --skip-duplicate
+          if [ -n "$NUGET_API_KEY" ]; then
+            dotnet nuget push "./nupkg/*.nupkg" \
+              --api-key "$NUGET_API_KEY" \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          else
+            echo "NUGET_API_KEY secret not set; skipping NuGet.org publish."
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
