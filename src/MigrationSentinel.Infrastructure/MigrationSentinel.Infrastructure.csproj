@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackageId>MigrationSentinel.Infrastructure</PackageId>
+    <Description>File system scanners, Git diff analyzers, OpenAI/Ollama AI review clients, and JSON/Markdown/SARIF report formatters for MigrationSentinel.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MigrationSentinel.Core\MigrationSentinel.Core.csproj" />
+  </ItemGroup>
+
+</Project>
