@@ -1,0 +1,138 @@
+name: CI/CD — Build, Test & Package
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  security-events: write
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: true
+  CONFIGURATION: Release
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore MigrationSentinel.sln
+
+      - name: Build solution
+        run: dotnet build MigrationSentinel.sln --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Run xUnit test suite
+        run: >
+          dotnet test MigrationSentinel.sln
+          --configuration ${{ env.CONFIGURATION }}
+          --no-build
+          --verbosity normal
+          --logger "trx;LogFileName=test-results.trx"
+          --collect:"XPlat Code Coverage"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: '**/TestResults/**'
+
+  pack-and-smoke-test:
+    name: Pack NuGet Global Tool & Smoke Test
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Pack Core library & CLI global tool
+        run: |
+          dotnet pack src/MigrationSentinel.Core/MigrationSentinel.Core.csproj -c ${{ env.CONFIGURATION }} -o ./nupkg
+          dotnet pack src/MigrationSentinel.Cli/MigrationSentinel.Cli.csproj -c ${{ env.CONFIGURATION }} -o ./nupkg
+
+      - name: Install packed global tool locally & smoke test
+        run: |
+          dotnet tool install MigrationSentinel --tool-path ./tool-smoke --add-source ./nupkg
+          ./tool-smoke/migration-sentinel rules
+          ./tool-smoke/migration-sentinel scan samples --format sarif --output sentinel-results.sarif --fail-on none
+          ./tool-smoke/migration-sentinel scan samples --format markdown --output sentinel-report.md --fail-on none
+          cat sentinel-report.md
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg-packages
+          path: ./nupkg/*.nupkg
+
+      - name: Upload SARIF report to GitHub Code Scanning
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sentinel-results.sarif
+
+  release:
+    name: Publish GitHub Release & NuGet
+    needs: pack-and-smoke-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract semantic version from tag
+        id: version
+        run: echo "value=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Pack release packages
+        run: |
+          dotnet pack src/MigrationSentinel.Core/MigrationSentinel.Core.csproj -c Release -p:Version=${{ steps.version.outputs.value }} -o ./nupkg
+          dotnet pack src/MigrationSentinel.Cli/MigrationSentinel.Cli.csproj -c Release -p:Version=${{ steps.version.outputs.value }} -o ./nupkg
+
+      - name: Publish to NuGet.org
+        if: ${{ secrets.NUGET_API_KEY != '' }}
+        run: |
+          dotnet nuget push "./nupkg/*.nupkg" \
+            --api-key "${{ secrets.NUGET_API_KEY }}" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: ./nupkg/*.nupkg
